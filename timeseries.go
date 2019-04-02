@@ -54,9 +54,9 @@ func (ts *Timeseries) GetRowsSince(since time.Duration) []Row {
 	var rows []Row
 	ts.RLock()
 	defer ts.RUnlock()
-	// Time since `since` could possibly not be a round number of seconds. We need to decide whether to count
-	// all or none of the hits that happened during that split second. Here we decide to include them all, hence
-	// we Truncate(...)
+	// Time since any data point in the DB could possibly not be a round number of seconds. We need to decide
+	// whether to count all or none of the hits that happened during that split second. Here we decide to include
+	// them all, hence we Truncate(...)
 	for i := len(ts.s) - 1; i >= 0 && time.Since(ts.s[i].time).Truncate(time.Second) <= since; i-- {
 		rows = append(rows, ts.s[i])
 	}
