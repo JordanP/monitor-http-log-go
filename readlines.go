@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
@@ -42,7 +43,7 @@ func readlines(ctx context.Context, filepath string, lines chan<- string) error 
 			return err
 		}
 		// From now on, err is either nil or is io.EOF
-		lines <- string(by)
+		lines <- strings.TrimRight(string(by), "\n")
 	}
 }
 

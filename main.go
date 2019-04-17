@@ -21,7 +21,7 @@ var (
 		Level:     logrus.DebugLevel,
 	}
 
-	commonLogFormat = regexp.MustCompile(`(?P<client_ip>[^ ]*) (?P<user_identifier>[^ ]*) (?P<user_id>[^ ]*) \[(?P<date>[^]]*)\] "(?P<http_method>[A-Z]*) (?P<http_url>[^"]*) (?P<http_version>HTTP/\d.\d)" (?P<status_code>[^ ]*) (?P<bytes_sent>[^ ]*)`)
+	commonLogFormat = regexp.MustCompile(`^(?P<client_ip>\S+) \S+ (?P<userid>\S+) \[(?P<date>[^\]]+)\] "(?P<http_method>[A-Z]+) (?P<http_url>[^ "]+)? HTTP/[0-9.]+" (?P<status_code>[0-9]{3}) (?P<bytes_sent>[0-9]+|-)`)
 )
 
 func parseHitLines(lines <-chan string, hits chan<- HTTPHit) error {
@@ -93,7 +93,9 @@ func printStats(ctx context.Context, period time.Duration, ts *Timeseries) error
 		case <-ticker.C:
 			log.Printf("Top 3 sections in the last %s: %v", period, ts.TopNSectionsSince(3, period))
 			req, bw := ts.GetAvgRate(period)
-			log.Printf("Average req/s: %.1f, Average throughput: %.1f B/s", req, bw)
+			log.Printf("Average in the last %s: req/s: %.1f, throughput: %.1f B/s", period, req, bw)
+			req, bw = ts.GetAvgRate(2*time.Minute)
+			log.Printf("Average in the last 2m: req/s: %.1f, throughput: %.1f B/s", req, bw)
 		}
 	}
 }
